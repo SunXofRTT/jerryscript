@@ -678,7 +678,7 @@ DECLARE_HANDLER(socket_connect)
     int port = -1;
     char *host = RT_NULL;
     int family = 4;
-
+    int onTCP_NODELAY = 1;
     jerry_value_t js_connect_cb = RT_NULL;
     /*get socket_info*/
     struct socket_info *js_socket_info = RT_NULL;
@@ -739,11 +739,25 @@ DECLARE_HANDLER(socket_connect)
         if (family == 4)
         {
             js_socket_info->socket_id = socket(PF_INET, SOCK_STREAM, 0);
+            #ifdef WIN32  
+                setsockopt(js_socket_info->socket_id, SOL_SOCKET, SO_KEEPALIVE, (const char *)&onTCP_NODELAY, sizeof(onTCP_NODELAY));  
+                setsockopt(js_socket_info->socket_id, IPPROTO_TCP, TCP_NODELAY, (const char *)&onTCP_NODELAY, sizeof(onTCP_NODELAY));  
+            #else  
+                setsockopt(js_socket_info->socket_id, SOL_SOCKET, SO_KEEPALIVE, (void *)&onTCP_NODELAY, sizeof(onTCP_NODELAY));  
+                setsockopt(js_socket_info->socket_id, IPPROTO_TCP, TCP_NODELAY, (void *)&onTCP_NODELAY, sizeof(onTCP_NODELAY));  
+            #endif
         }
 #if LWIP_IPV6
         else if (family == 6)
         {
             js_socket_info->server_socket = socket(PF_INET6, SOCK_STREAM, 0);
+             #ifdef WIN32  
+                setsockopt(js_socket_info->server_socket, SOL_SOCKET, SO_KEEPALIVE, (const char *)&onTCP_NODELAY, sizeof(onTCP_NODELAY));  
+                setsockopt(js_socket_info->server_socket, IPPROTO_TCP, TCP_NODELAY, (const char *)&onTCP_NODELAY, sizeof(onTCP_NODELAY));  
+            #else  
+                setsockopt(js_socket_info->server_socket, SOL_SOCKET, SO_KEEPALIVE, (void *)&onTCP_NODELAY, sizeof(onTCP_NODELAY));  
+                setsockopt(js_socket_info->server_socket, IPPROTO_TCP, TCP_NODELAY, (void *)&onTCP_NODELAY, sizeof(onTCP_NODELAY));  
+            #endif
         }
 #endif
         else
